@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173b3f">
+  <title>Sorties bateau</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+    :root { --ink:#173b3f; --muted:#607274; --paper:#f5f1e9; --panel:#fffdf8; --line:#d8dfda; --accent:#e27d42; --accent-dark:#b85b29; --mint:#d9ebe3; --danger:#a83d36; --shadow:0 18px 45px rgba(23,59,63,.12); }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:radial-gradient(circle at 88% 8%, #d9ebe3 0, transparent 28%), linear-gradient(135deg,#f5f1e9 0%,#edf3ed 100%); font-family:'DM Sans',sans-serif; min-height:100vh; }
+    h1,h2,h3,button,.brand { font-family:'Space Grotesk',sans-serif; }
+    button,input,select,textarea { font:inherit; }
+    .shell { width:min(1080px,calc(100% - 32px)); margin:0 auto; padding:28px 0 48px; }
+    header { display:flex; justify-content:space-between; align-items:center; gap:20px; margin-bottom:34px; }
+    .brand { font-weight:700; letter-spacing:.02em; font-size:1.05rem; display:flex; align-items:center; gap:10px; }
+    .brand-mark { width:34px; height:34px; display:grid; place-items:center; background:var(--accent); color:white; border-radius:50% 50% 50% 8px; transform:rotate(-12deg); }
+    .brand-mark span { transform:rotate(12deg); }
+    .status { color:var(--muted); font-size:.9rem; }
+    .view { animation:rise .45s ease both; }
+    .auth { max-width:620px; margin:8vh auto; background:rgba(255,253,248,.9); padding:clamp(28px,6vw,66px); border:1px solid rgba(255,255,255,.8); box-shadow:var(--shadow); }
+    .eyebrow { color:var(--accent-dark); text-transform:uppercase; font-size:.75rem; font-weight:700; letter-spacing:.12em; }
+    h1 { font-size:clamp(2.3rem,6vw,4.6rem); line-height:.98; margin:16px 0; max-width:600px; letter-spacing:-.04em; }
+    h2 { font-size:1.55rem; margin:0 0 8px; letter-spacing:-.03em; }
+    p { line-height:1.55; }
+    .lead { color:var(--muted); max-width:480px; }
+    .field { display:grid; gap:8px; margin-bottom:18px; }
+    label { font-size:.86rem; font-weight:700; }
+    input,select,textarea { width:100%; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:8px; padding:13px 14px; outline:none; transition:border .2s,box-shadow .2s; }
+    input:focus,select:focus,textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(226,125,66,.16); }
+    textarea { resize:vertical; min-height:88px; }
+    .button-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    button { border:0; border-radius:8px; padding:13px 18px; font-weight:700; cursor:pointer; transition:transform .2s,background .2s; }
+    button:hover { transform:translateY(-1px); }
+    .primary { background:var(--accent); color:white; }
+    .primary:hover { background:var(--accent-dark); }
+    .secondary { background:var(--ink); color:white; }
+    .ghost { background:transparent; color:var(--ink); border:1px solid var(--line); }
+    .danger { color:var(--danger); }
+    .message { border-radius:8px; padding:12px 14px; margin:16px 0 0; background:#fbe9e3; color:var(--danger); }
+    .message.success { background:var(--mint); color:var(--ink); }
+    .hidden { display:none !important; }
+    .dashboard-head { display:flex; justify-content:space-between; align-items:end; gap:20px; margin-bottom:24px; }
+    .balance { background:var(--ink); color:white; padding:20px 24px; min-width:180px; border-radius:8px; }
+    .balance small { color:#b8d2c9; display:block; margin-bottom:5px; }
+    .balance strong { font:700 1.65rem 'Space Grotesk',sans-serif; }
+    .grid { display:grid; grid-template-columns:1.2fr .8fr; gap:20px; }
+    .panel { background:rgba(255,253,248,.88); border:1px solid rgba(255,255,255,.85); box-shadow:var(--shadow); padding:24px; border-radius:8px; }
+    .form-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 16px; }
+    .full { grid-column:1/-1; }
+    .summary { background:var(--mint); padding:22px; border-radius:8px; margin-top:20px; }
+    .summary p { margin:8px 0; }
+    .summary strong { color:var(--accent-dark); }
+    .subtle { color:var(--muted); font-size:.9rem; }
+    .history-panel { margin-top:20px; }
+    .history-item { border-top:1px solid var(--line); padding:15px 0; }
+    .history-item summary { cursor:pointer; list-style:none; display:grid; grid-template-columns:1fr repeat(2,minmax(100px,auto)); gap:14px; align-items:center; }
+    .history-item summary::-webkit-details-marker { display:none; }
+    .history-item summary::before { content:'+'; font-weight:700; margin-right:6px; color:var(--accent-dark); }
+    .history-item[open] summary::before { content:'−'; }
+    .history-detail { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; background:#f7f5ef; padding:15px; margin-top:12px; font-size:.88rem; }
+    .detail-cell span { display:block; color:var(--muted); font-size:.76rem; margin-bottom:3px; }
+    @keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+    @media (max-width:720px) { .shell { width:min(100% - 22px,620px); padding-top:18px; } header { margin-bottom:22px; } .status { display:none; } .dashboard-head { align-items:stretch; flex-direction:column; } .balance { min-width:0; } .grid { grid-template-columns:1fr; } .panel { padding:18px; } .form-grid { grid-template-columns:1fr; } .full { grid-column:auto; } h1 { font-size:2.75rem; } .history-item summary { grid-template-columns:1fr auto; } .history-item summary span:last-child { grid-column:2; grid-row:1; } .history-detail { grid-template-columns:repeat(2,1fr); } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header><div class="brand"><span class="brand-mark"><span>↗</span></span> Sorties bateau</div><div id="status" class="status"></div></header>
+    <section id="auth-view" class="view auth">
+      <div class="eyebrow">Espace équipage</div><h1>Prépare ta sortie.</h1><p class="lead">Connecte-toi avec ton code secret pour calculer le coût, gérer ton avoir et retrouver ton historique.</p>
+      <form id="auth-form"><div class="field"><label for="secret">Code secret</label><input id="secret" type="password" autocomplete="off" required></div><button class="primary" type="submit">Accéder à mon espace</button></form><div id="auth-message" class="message hidden" role="alert"></div>
+    </section>
+    <section id="app-view" class="view hidden">
+      <div class="dashboard-head"><div><div class="eyebrow">Bonjour <span id="user-name"></span></div><h1>Ta prochaine sortie</h1></div><div class="balance"><small>Avoir disponible</small><strong id="balance">0,00 €</strong></div></div>
+      <div class="grid"><section class="panel"><h2>Calculer le coût</h2><p class="subtle">Le calcul reste modifiable jusqu'à la confirmation.</p><form id="trip-form"><div class="form-grid"><div class="field"><label for="trip-date">Date de sortie</label><input id="trip-date" type="date" required></div><div class="field"><label for="duration">Type de durée</label><select id="duration" required></select></div><div class="field"><label for="engine-start">Heure moteur au début</label><input id="engine-start" type="number" min="0" step="0.01" required></div><div class="field"><label for="engine-end">Heure moteur à la fin</label><input id="engine-end" type="number" min="0" step="0.01" required></div><div class="field"><label for="fuel-start">Compteur essence au début</label><input id="fuel-start" type="number" min="0" step="0.01" required></div><div class="field"><label for="fuel-end">Compteur essence à la fin</label><input id="fuel-end" type="number" min="0" step="0.01" required></div><div class="field"><label for="refill">Montant du plein éventuel</label><input id="refill" type="text" inputmode="decimal" value="0" placeholder="0,00"></div><div class="field full"><label for="note">Remarque</label><textarea id="note" placeholder="Une précision pour toi ou l'administrateur..."></textarea></div></div><div class="button-row"><button class="primary" type="submit">Calculer</button><button id="history-button" class="ghost" type="button">Voir mon historique</button><button id="logout-button" class="ghost" type="button">Quitter</button></div></form><div id="form-message" class="message hidden" role="alert"></div></section><aside><section id="summary" class="summary hidden"><div class="eyebrow">Récapitulatif</div><div id="summary-text"></div><div class="button-row"><button id="back-button" class="ghost" type="button">Retour</button><button id="confirm-button" class="secondary" type="button">Confirmer</button></div></section><section id="success" class="summary hidden"><div class="eyebrow">C'est enregistré</div><h2>La sortie a bien été enregistrée.</h2><p id="success-text"></p><button id="copy-button" class="primary" type="button">Copier pour WhatsApp</button></section></aside></div>
+      <section id="history" class="panel history-panel hidden"><div class="dashboard-head"><div><div class="eyebrow">Personnel</div><h2>Mon historique</h2></div><button id="close-history" class="ghost" type="button">Fermer</button></div><div id="history-list"></div></section>
+    </section>
+  </main>
+  <script>
+    const API_URL = 'REMPLACER_PAR_URL_DE_LA_WEB_APP_APPS_SCRIPT';
+    const state = { secret: '', user: null, settings: null, lastResult: null, lastInput: null, lastCopy: '' };
+    const $ = (id) => document.getElementById(id);
+    const euro = (value) => new Intl.NumberFormat('fr-FR', { style:'currency', currency:'EUR' }).format(Number(value) || 0);
+    const decimal = (value) => Number(String(value ?? '').replace(',', '.'));
+    const dateLabel = (value) => new Intl.DateTimeFormat('fr-FR', { dateStyle:'long' }).format(new Date(value + 'T12:00:00'));
+    const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[character]));
+    const show = (element, visible) => element.classList.toggle('hidden', !visible);
+    function setMessage(id, text, success = false) { const element = $(id); element.textContent = text; element.classList.toggle('hidden', !text); element.classList.toggle('success', success); }
+    async function request(url, options) { if (API_URL.startsWith('REMPLACER_')) throw new Error('Configurez API_URL dans index.html avant de tester.'); const response = await fetch(url, options); const data = await response.json(); if (!data.success) throw new Error(data.message || 'La requête a échoué.'); return data; }
+    async function post(action, payload = {}) { return request(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(Object.assign({ action, codeSecret:state.secret }, payload)) }); }
+    async function get(action) { return post(action); }
+    function renderUser() { $('user-name').textContent = state.user.nom; $('balance').textContent = euro(state.user.avoir); $('status').textContent = 'Connecté · ' + state.user.nom; $('duration').innerHTML = '<option value="Moins3h">Moins de 3 h</option><option value="Journee">Journée</option>' + (state.user.gratuite === 0 ? '<option value="Gratuite">Sortie gratuite</option>' : ''); }
+    function inputData() { return { date:$('trip-date').value, duration:$('duration').value, engineStart:decimal($('engine-start').value), engineEnd:decimal($('engine-end').value), fuelStart:decimal($('fuel-start').value), fuelEnd:decimal($('fuel-end').value), refillPaid:decimal($('refill').value || '0'), note:$('note').value.trim() }; }
+    function validate(data) { if (!data.date || !data.duration) return 'La date et le type de durée sont obligatoires.'; if (![data.engineStart,data.engineEnd,data.fuelStart,data.fuelEnd].every(Number.isFinite)) return 'Les quatre relevés moteur et essence sont obligatoires.'; if (!Number.isFinite(data.refillPaid) || data.refillPaid < 0) return 'Le montant du plein doit être positif ou nul.'; if (data.engineEnd < data.engineStart) return 'L’heure moteur de fin ne peut pas être inférieure au début.'; if (data.fuelEnd < data.fuelStart) return 'Le compteur essence final ne peut pas être inférieur au début.'; if (data.duration === 'Gratuite' && state.user.gratuite !== 0) return 'Votre sortie gratuite annuelle a déjà été utilisée.'; return ''; }
+    function clientCalculate(data) { const day = new Date(data.date + 'T12:00:00'); const month = day.getMonth() + 1; const holiday = state.settings.joursFeries.includes(data.date); const category = [0,6].includes(day.getDay()) || holiday ? 'WeekendFerie' : 'Semaine'; const tariff = data.duration === 'Gratuite' ? 0 : Number(state.settings.tarifs[month + '|' + category + '|' + data.duration]); const liters = Math.round((data.fuelEnd - data.fuelStart) * 100) / 100; const fuelCost = Math.round(liters * state.settings.prixEssenceUnitaire * 100) / 100; const gross = Math.round((tariff + fuelCost) * 100) / 100; const balance = Math.round((state.user.avoir + data.refillPaid - gross) * 100) / 100; return { category, tariff, liters, fuelCost, gross, balanceBefore:state.user.avoir, refillPaid:data.refillPaid, amountDue:balance < 0 ? -balance : 0, newBalance:balance < 0 ? 0 : balance, isFree:data.duration === 'Gratuite' }; }
+    function renderSummary(result, data) { let text = '<p><strong>' + escapeHtml(state.user.nom) + '</strong>, pour la sortie du ' + dateLabel(data.date) + ', le coût est de <strong>' + euro(result.gross) + '</strong> dont ' + euro(result.fuelCost) + " d'essence.</p>"; if (result.balanceBefore > 0) text += '<p>Ton avoir de ' + euro(result.balanceBefore) + ' est utilisé.</p>'; if (result.refillPaid > 0) text += '<p>Le plein de ' + euro(result.refillPaid) + ' est pris en compte.</p>'; text += result.amountDue > 0 ? '<p>Il reste <strong>' + euro(result.amountDue) + ' à régler</strong>.</p>' : '<p>Il te reste <strong>' + euro(result.newBalance) + " d'avoir</strong> pour la prochaine sortie.</p>"; $('summary-text').innerHTML = text; show($('summary'), true); show($('success'), false); }
+    function makeCopy(result, data) { let text = state.user.nom + ' — sortie du ' + dateLabel(data.date) + '\nCoût de la sortie : ' + euro(result.gross) + ", dont " + euro(result.fuelCost) + " d’essence.\n"; if (result.balanceBefore > 0) text += 'Avoir utilisé : ' + euro(result.balanceBefore) + '.\n'; if (result.refillPaid > 0) text += 'Plein pris en compte : ' + euro(result.refillPaid) + '.\n'; text += result.amountDue > 0 ? 'Montant à régler : ' + euro(result.amountDue) + '.' : 'Nouvel avoir : ' + euro(result.newBalance) + '.'; return text; }
+    function addDetail(container, label, value) { const cell = document.createElement('div'); cell.className = 'detail-cell'; const caption = document.createElement('span'); caption.textContent = label; cell.append(caption, document.createTextNode(value || '—')); container.appendChild(cell); }
+    async function loadHistory() { const data = await get('history'); const list = $('history-list'); list.replaceChildren(); if (!data.history.length) { const empty = document.createElement('p'); empty.className = 'subtle'; empty.textContent = 'Aucune sortie enregistrée.'; list.appendChild(empty); return; } data.history.slice().reverse().forEach((item) => { const row = document.createElement('details'); row.className = 'history-item'; const summary = document.createElement('summary'); const date = document.createElement('span'); date.textContent = dateLabel(item.Date); const gross = document.createElement('strong'); gross.textContent = euro(item.CoutBrutSortie); const final = document.createElement('span'); const old = data.dateMiseEnService && item.Date < data.dateMiseEnService && Number(item.MontantARegler) < 0; final.textContent = (old ? 'Avoir ancien fonctionnement' : 'Coût final') + ' : ' + euro(Math.abs(Number(item.MontantARegler) || 0)); summary.append(date, gross, final); const details = document.createElement('div'); details.className = 'history-detail'; addDetail(details, 'Essence consommée', euro(item.CoutEssenceConsommee)); addDetail(details, 'Plein réalisé', euro(item.MontantPleinPaye)); addDetail(details, 'Avoir précédent', euro(item.AvoirAvant)); Object.entries(item).filter(([key]) => !['Date','CoutBrutSortie','CoutEssenceConsommee','MontantPleinPaye','AvoirAvant','MontantARegler'].includes(key)).forEach(([key, value]) => addDetail(details, key, String(value))); row.append(summary, details); list.appendChild(row); }); }
+    $('auth-form').addEventListener('submit', async (event) => { event.preventDefault(); setMessage('auth-message',''); state.secret = $('secret').value; try { const data = await get('bootstrap'); state.user = data.user; state.settings = { tarifs:data.settings.tariffs, prixEssenceUnitaire:data.settings.fuelPrice, joursFeries:data.settings.holidays }; renderUser(); show($('auth-view'), false); show($('app-view'), true); $('trip-date').focus(); } catch (error) { state.secret = ''; setMessage('auth-message', error.message); } });
+    $('trip-form').addEventListener('submit', (event) => { event.preventDefault(); const data = inputData(); const error = validate(data); if (error) { setMessage('form-message', error); return; } setMessage('form-message',''); state.lastInput = data; state.lastResult = clientCalculate(data); renderSummary(state.lastResult, data); });
+    $('back-button').addEventListener('click', () => { show($('summary'), false); $('trip-date').focus(); });
+    $('confirm-button').addEventListener('click', async () => { try { $('confirm-button').disabled = true; const data = state.lastInput; const response = await post('createTrip', data); state.user = response.user; state.lastResult = response.result; state.lastCopy = makeCopy(response.result, data); renderUser(); $('success-text').textContent = state.lastCopy; show($('summary'), false); show($('success'), true); setMessage('form-message', response.message, true); } catch (error) { setMessage('form-message', error.message); } finally { $('confirm-button').disabled = false; } });
+    $('copy-button').addEventListener('click', async () => { await navigator.clipboard.writeText(state.lastCopy); $('copy-button').textContent = 'Copié'; setTimeout(() => $('copy-button').textContent = 'Copier pour WhatsApp', 1800); });
+    $('history-button').addEventListener('click', async () => { try { await loadHistory(); show($('history'), true); $('history').scrollIntoView({ behavior:'smooth' }); } catch (error) { setMessage('form-message', error.message); } });
+    $('close-history').addEventListener('click', () => show($('history'), false));
+    $('logout-button').addEventListener('click', () => { state.secret = ''; state.user = null; state.settings = null; $('auth-form').reset(); show($('app-view'), false); show($('auth-view'), true); $('status').textContent = ''; });
+  </script>
+</body>
+</html>
