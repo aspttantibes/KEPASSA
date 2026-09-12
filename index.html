@@ -28,6 +28,10 @@
     .field { display:grid; gap:8px; margin-bottom:18px; }
     label { font-size:.86rem; font-weight:700; }
     input,select,textarea { width:100%; border:1px solid var(--line); background:#fff; color:var(--ink); border-radius:8px; padding:13px 14px; outline:none; transition:border .2s,box-shadow .2s; }
+    .password-field { position:relative; }
+    .password-field input { padding-right:46px; }
+    .password-field button { position:absolute; right:4px; top:50%; transform:translateY(-50%); border:0; background:transparent; padding:8px 10px; font-size:1.05rem; line-height:1; cursor:pointer; }
+    .password-field button:hover { transform:translateY(-50%); background:transparent; }
     input:focus,select:focus,textarea:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(226,125,66,.16); }
     textarea { resize:vertical; min-height:88px; }
     .button-row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
@@ -70,7 +74,7 @@
     <header><div class="brand"><span class="brand-mark"><span>↗</span></span> Sorties bateau</div><div id="status" class="status"></div></header>
     <section id="auth-view" class="view auth">
       <div class="eyebrow">Espace équipage</div><h1>Prépare ta sortie.</h1><p class="lead">Connecte-toi avec ton code secret pour calculer le coût, gérer ton avoir et retrouver ton historique.</p>
-      <form id="auth-form"><div class="field"><label for="secret">Code secret</label><input id="secret" type="password" autocomplete="off" required></div><button class="primary" type="submit">Accéder à mon espace</button></form><div id="auth-message" class="message hidden" role="alert"></div>
+      <form id="auth-form"><div class="field"><label for="secret">Code secret</label><div class="password-field"><input id="secret" type="password" autocomplete="off" required><button id="toggle-secret" class="ghost" type="button" aria-label="Afficher le code secret">👁</button></div></div><button class="primary" type="submit">Accéder à mon espace</button></form><div id="auth-message" class="message hidden" role="alert"></div>
     </section>
     <section id="app-view" class="view hidden">
       <div class="dashboard-head"><div><div class="eyebrow">Bonjour <span id="user-name"></span></div><h1>Ta prochaine sortie</h1></div><div class="balance"><small>Avoir disponible</small><strong id="balance">0,00 €</strong></div></div>
@@ -87,6 +91,7 @@
     const dateLabel = (value) => new Intl.DateTimeFormat('fr-FR', { dateStyle:'long' }).format(new Date(value + 'T12:00:00'));
     const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[character]));
     const show = (element, visible) => element.classList.toggle('hidden', !visible);
+    $('toggle-secret').addEventListener('click', () => { const field = $('secret'); const revealed = field.type === 'text'; field.type = revealed ? 'password' : 'text'; $('toggle-secret').textContent = revealed ? '👁' : '🙈'; $('toggle-secret').setAttribute('aria-label', revealed ? 'Afficher le code secret' : 'Masquer le code secret'); });
     function setMessage(id, text, success = false) { const element = $(id); element.textContent = text; element.classList.toggle('hidden', !text); element.classList.toggle('success', success); }
     async function request(url, options) { if (API_URL.startsWith('REMPLACER_')) throw new Error('Configurez API_URL dans index.html avant de tester.'); try { const response = await fetch(url, options); const contentType = response.headers.get('content-type') || ''; if (!contentType.includes('application/json')) throw new Error('L’API Apps Script ne renvoie pas du JSON. Redéployez la dernière version avec doPost.'); const data = await response.json(); if (!data.success) throw new Error(data.message || 'La requête a échoué.'); return data; } catch (error) { if (error instanceof TypeError) throw new Error('API inaccessible. Vérifiez que le déploiement Apps Script est public, utilise l’URL /exec et contient doPost.'); throw error; } }
     async function post(action, payload = {}) { return request(API_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(Object.assign({ action, codeSecret:state.secret }, payload)) }); }
